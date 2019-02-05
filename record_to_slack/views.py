@@ -30,13 +30,13 @@ def home():
     if slack_bot is not None:
         return redirect(url_for('record'))
     else:
-        return render_template('home.html')
+        return render_template('home.html', redirect_uri = os.getenv('SLACK_REDIRECT_ADD_URI'))
 
 @app.route("/login")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('record'))
-    return render_template('login.html')
+    return render_template('login.html', redirect_uri = os.getenv('SLACK_REDIRECT_URI'))
 
 @app.route("/logout")
 @login_required
@@ -47,7 +47,7 @@ def logout():
 @app.route("/slack/add/redirect")
 def oauth_add_redirect():
     code = request.args.get('code')
-    oauth = get_slack_auth(redirect_uri='http://localhost:5000/slack/add/redirect')
+    oauth = get_slack_auth(redirect_uri=os.getenv('SLACK_REDIRECT_ADD_URI'))
     token_response = oauth.fetch_token(
         'https://slack.com/api/oauth.access',
         code=code,

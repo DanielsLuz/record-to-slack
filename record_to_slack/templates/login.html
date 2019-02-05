@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<a href="https://slack.com/oauth/authorize?scope=identity.basic&client_id=200259025942.518861161521&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fslack%2Flogin%2Fredirect%0A">
+<a href="https://slack.com/oauth/authorize?scope=identity.basic&client_id=200259025942.518861161521&redirect_uri={{ redirect_uri|urlencode }}">
   <img src="https://api.slack.com/img/sign_in_with_slack.png" />
 </a>
 {% endblock %}
