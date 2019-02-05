@@ -1,1 +1,1 @@
-web: gunicorn app:app
+web: gunicorn record_to_slack:app
