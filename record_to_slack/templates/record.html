@@ -1,113 +1,87 @@
-<div class="left">
-  <div id="startButton" class="button">
+<div class="actions">
+  <div id="recordButton" class="button">
     Start
   </div>
-  <h2>Preview</h2>
-  <video id="preview" width="160" height="120" autoplay muted></video>
-</div>
-<div class="right">
-  <div id="stopButton" class="button">
-    Stop
-  </div>
-  <h2>Recording</h2>
-  <video id="recording" width="160" height="120" controls></video>
+  <audio id="recording" controls></audio>
   <a id="submitButton" class="button">
     Submit
   </a>
 </div>
-<div class="bottom">
-  <pre id="log"></pre>
-</div>
 
 <script>
-let preview = document.getElementById("preview");
-let recording = document.getElementById("recording");
-let startButton = document.getElementById("startButton");
-let stopButton = document.getElementById("stopButton");
-let logElement = document.getElementById("log");
-let submitButton = document.getElementById("submitButton");
-
-let recordingTimeMS = 5000;
-
-const log = (msg) => logElement.innerHTML += msg + "\n";
+const recording = document.getElementById("recording")
+const submitButton = document.getElementById("submitButton")
+const recordButton = document.getElementById("recordButton")
+let isRecording = false
 
 const Recorder = () => {
   let recordStream
   let lastRecording
+  let mediaRecorder
 
-  const startRecording = (stream, lengthInMS) => {
-    let recorder = new MediaRecorder(stream);
-    let data = [];
+  const startRecording = (stream) => {
+    const audioChunks = []
+    mediaRecorder = new MediaRecorder(stream)
+    recordStream = stream
 
-    recorder.ondataavailable = event => data.push(event.data);
-    recorder.start();
-    log(recorder.state + " for " + (lengthInMS/1000) + " seconds...");
-
-    let stopped = new Promise((resolve, reject) => {
-      recorder.onstop = resolve;
-      recorder.onerror = event => reject(event.name);
-    })
-
-    let recorded = Promise.resolve(setTimeout(() => {
-      recorder.state == "recording" && recorder.stop()
-    }, lengthInMS))
-
-    return Promise.all([
-      stopped,
-      recorded
-    ]).then(() => data);
+    mediaRecorder.ondataavailable = event => {
+      audioChunks.push(event.data)
+      if(mediaRecorder.state == "inactive") {
+        let recordedBlob = new Blob(audioChunks, { type: "audio/mp3" })
+        lastRecording = recordedBlob
+        recording.src = URL.createObjectURL(recordedBlob)
+      }
+    }
+    mediaRecorder.start()
   }
 
   const start = () => {
     navigator.mediaDevices.getUserMedia({
-      audio: true
-    }).then(stream => {
-      recordStream = stream
-      preview.srcObject = stream;
-      preview.captureStream = preview.captureStream || preview.mozCaptureStream;
-      return resolve => preview.onplaying = resolve;
-    }).then(
-      () => startRecording(preview.captureStream(), recordingTimeMS)
-    ).then (recordedChunks => {
-      let recordedBlob = new Blob(recordedChunks, { type: "audio/mp3" });
-      lastRecording = recordedBlob;
-      recording.src = URL.createObjectURL(recordedBlob);
-      log("Successfully recorded " + recordedBlob.size + " bytes of " +
-          recordedBlob.type + " media.");
-    }).catch(log);
+      audio: true,
+    }).then(stream => startRecording(stream))
   }
 
-  const stop = () => recordStream.getTracks().forEach(track => track.stop());
+  const stop = () => {
+    recordStream.getTracks().forEach(track => track.stop())
+    mediaRecorder.stop()
+  }
 
   return {
     start,
     stop,
-    lastRecording
+    lastRecording: () => lastRecording
   }
 }
 
 const recorder = Recorder()
-startButton.addEventListener("click", recorder.start, false)
-stopButton.addEventListener("click", recorder.stop, false);
+
+recordButton.addEventListener("click", function() {
+  if (isRecording) {
+    recorder.stop()
+    this.innerHTML = "Start"
+    this.classList.remove("stop")
+    isRecording = false
+  } else {
+    this.innerHTML = "Stop"
+    this.classList.add("stop")
+    recorder.start()
+    isRecording = true
+  }
+})
 
 submitButton.addEventListener("click", () => {
-  let formData = new FormData();
-  let request = new XMLHttpRequest();
+  let formData = new FormData()
+  let request = new XMLHttpRequest()
 
-  formData.append("recording", recorder.lastRecording, "recording_filename.mp3")
-  request.open("POST", "/recording");
-  request.send(formData);
+  formData.append("recording", recorder.lastRecording(), "recording_filename.mp3")
+  request.open("POST", "/recording")
+  request.send(formData)
 })
 </script>
 
 <style>
 body {
   font: 14px "Open Sans", "Arial", sans-serif;
-}
-
-video {
-  margin-top: 2px;
-  border: 1px solid black;
 }
 
 .button {
@@ -124,26 +98,8 @@ video {
   text-decoration: none;
 }
 
-h2 {
-  margin-bottom: 4px;
-}
-
-.left {
-  margin-right: 10px;
-  float: left;
-  width: 160px;
-  padding: 0px;
-}
-
-.right {
-  margin-left: 10px;
-  float: left;
-  width: 160px;
-  padding: 0px;
-}
-
-.bottom {
-  clear: both;
-  padding-top: 10px;
+.button.stop {
+  color: darkgreen;
+  background-color: white;
 }
 </style>
