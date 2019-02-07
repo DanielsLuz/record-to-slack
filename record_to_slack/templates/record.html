@@ -1,18 +1,28 @@
-<div class="actions">
-  <div id="recordButton" class="button">
-    Start
-  </div>
+{% extends "layout.html" %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='templates/record.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container">
   <audio id="recording" controls></audio>
-  <a id="submitButton" class="button">
-    Submit
-  </a>
+  <div class="actions">
+    <button id="recordButton">
+      Rec
+    </button>
+    <button id="stopButton" class="stop" disabled>
+      Stop
+    </button>
+    <button id="submitButton">
+      Submit
+    </button>
+  </div>
 </div>
 
 <script>
 const recording = document.getElementById("recording")
 const submitButton = document.getElementById("submitButton")
 const recordButton = document.getElementById("recordButton")
-let isRecording = false
+const stopButton = document.getElementById("stopButton")
 
 const Recorder = () => {
   let recordStream
@@ -55,21 +65,24 @@ const Recorder = () => {
 
 const recorder = Recorder()
 
-recordButton.addEventListener("click", function() {
-  if (isRecording) {
-    recorder.stop()
-    this.innerHTML = "Start"
-    this.classList.remove("stop")
-    isRecording = false
-  } else {
-    this.innerHTML = "Stop"
-    this.classList.add("stop")
-    recorder.start()
-    isRecording = true
-  }
+recordButton.addEventListener("click", (e) => {
+  e.preventDefault()
+  recordButton.disabled = true
+  recordButton.classList.add("recording")
+  stopButton.disabled = false
+  recorder.start()
 })
 
-submitButton.addEventListener("click", () => {
+stopButton.addEventListener("click", (e) => {
+  e.preventDefault()
+  recorder.stop()
+  recordButton.classList.remove("recording")
+  recordButton.disabled = false
+  stopButton.disabled = true
+})
+
+submitButton.addEventListener("click", (e) => {
+  e.preventDefault()
   let formData = new FormData()
   let request = new XMLHttpRequest()
 
@@ -78,28 +91,4 @@ submitButton.addEventListener("click", () => {
   request.send(formData)
 })
 </script>
-
-<style>
-body {
-  font: 14px "Open Sans", "Arial", sans-serif;
-}
-
-.button {
-  cursor: pointer;
-  display: block;
-  width: 160px;
-  border: 1px solid black;
-  font-size: 16px;
-  text-align: center;
-  padding-top: 2px;
-  padding-bottom: 4px;
-  color: white;
-  background-color: darkgreen;
-  text-decoration: none;
-}
-
-.button.stop {
-  color: darkgreen;
-  background-color: white;
-}
-</style>
+{% endblock %}

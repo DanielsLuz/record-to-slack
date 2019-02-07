@@ -1,4 +1,7 @@
 {% extends "layout.html" %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='templates/login.css') }}">
+{% endblock %}
 {% block content %}
 <a href="https://slack.com/oauth/authorize?scope=identity.basic&client_id=200259025942.518861161521&redirect_uri={{ redirect_uri|urlencode }}">
   <img src="https://api.slack.com/img/sign_in_with_slack.png" />

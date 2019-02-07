@@ -3,12 +3,3 @@ html, body {
   height: 100%;
   width: 100%;
 }
-
-#content {
-  display: flex;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  background: rgb(35,32,95);
-  background: radial-gradient(circle, rgba(35,32,95,1) 0%, rgba(63,14,64,1) 100%, rgba(9,122,145,1) 100%);
-}
