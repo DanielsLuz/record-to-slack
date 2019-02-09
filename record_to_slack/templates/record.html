@@ -6,15 +6,11 @@
 <div class="container">
   <audio id="recording" controls></audio>
   <div class="actions">
-    <button id="recordButton">
-      Rec
-    </button>
-    <button id="stopButton" class="stop" disabled>
-      Stop
-    </button>
-    <button id="submitButton">
-      Submit
-    </button>
+    <button id="recordButton"></button>
+    <button id="stopButton" class="stop" disabled></button>
+    <div id="submitButton">
+      Send
+    </div>
   </div>
 </div>
 
@@ -83,6 +79,11 @@ stopButton.addEventListener("click", (e) => {
 
 submitButton.addEventListener("click", (e) => {
   e.preventDefault()
+  if(!recorder.lastRecording()) {
+    alert("Nothing recorded yet.")
+    return
+  }
+
   let formData = new FormData()
   let request = new XMLHttpRequest()
 

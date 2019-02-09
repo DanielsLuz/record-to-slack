@@ -8,57 +8,67 @@
 
 .container {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  padding: 15px;
+  background-color: rgb(224, 199, 225);
+  border-radius: 5px;
 }
 
 .actions {
   display: flex;
-  padding-left: 10px;
-  padding-right: 10px;
+  margin: 10px;
 }
 
-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-  border: 1px solid darkgreen;
+.actions button, .actions #submitButton {
+	width: 35px;
+	height: 35px;
+	margin: 18px;
+}
+
+.actions #recordButton {
+	font-size: 0;
+	background-color: darkred;
+	border: 0;
   border-radius: 50%;
-  font-size: 16px;
-  color: white;
-  background-color: darkgreen;
-  cursor: pointer;
+	margin: 18px;
+	outline: none;
 }
 
-button.recording {
-  background-color: white;
-  color: red;
-  border-color: red;
-  animation: 1s infinite alternate blink;
+.actions #recordButton.recording {
+  background-color: red;
+  animation: 1.5s infinite linear pulse;
 }
 
-button:disabled {
+.actions #stopButton {
+  background-color: black;
+}
+
+.actions #stopButton:disabled {
   opacity: .7;
 }
 
-button.stop {
-  color: darkgreen;
-  background-color: white;
-}
-
-button#submitButton {
-  margin-left: 10px;
+.actions #submitButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 70px;
+  font-size: 25px;
+  background-color: white;
+  color: rgba(63,14,64,1);
+  margin-left: 30px;
+  border-radius: 5px;
 }
 
-@keyframes blink {
-  from {
-    opacity: 1;
+@keyframes pulse{
+  0%{
+    box-shadow: 0px 0px 5px 0px rgba(173,0,0,.3);
   }
-
-  to {
-    opacity: .5;
+  65%{
+    box-shadow: 0px 0px 5px 13px rgba(173,0,0,.3);
+  }
+  90%{
+    box-shadow: 0px 0px 5px 13px rgba(173,0,0,0);
   }
 }
 </style>
