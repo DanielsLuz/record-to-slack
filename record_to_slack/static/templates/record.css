@@ -4,6 +4,8 @@
   align-items: center;
   justify-content: center;
   background: rgba(63,14,64,1);
+  font-size: 25px;
+  color: rgba(63,14,64,1);
 }
 
 .container {
@@ -15,6 +17,14 @@
   border-radius: 5px;
 }
 
+.channel {
+  margin-bottom: 5px;
+}
+
+.channel select {
+  font-size: inherit;
+}
+
 .actions {
   display: flex;
   margin: 10px;
@@ -23,7 +33,7 @@
 .actions button, .actions #submitButton {
   width: 35px;
   height: 35px;
-  margin: 18px;
+  margin: 15px;
   cursor: pointer;
 }
 
@@ -32,7 +42,6 @@
 	background-color: darkred;
 	border: 0;
   border-radius: 50%;
-	margin: 18px;
 	outline: none;
 }
 
@@ -54,9 +63,7 @@
   align-items: center;
   justify-content: center;
   width: 70px;
-  font-size: 25px;
   background-color: white;
-  color: rgba(63,14,64,1);
   margin-left: 30px;
   border-radius: 5px;
 }

@@ -26,16 +26,6 @@ def get_slack_auth(state=None, token=None, redirect_uri=None):
     return oauth
 
 
-@app.route("/")
-@login_required
-def home():
-    slack_bot = SlackBot.query.filter_by(team_id=current_user.team_id).first()
-    if slack_bot is not None:
-        return redirect(url_for('record'))
-    else:
-        return render_template('home.html', redirect_uri=os.getenv('SLACK_REDIRECT_ADD_URI'))
-
-
 @app.route("/login")
 def login():
     if current_user.is_authenticated:
@@ -48,6 +38,35 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+
+@app.route("/")
+@login_required
+def home():
+    slack_bot = SlackBot.query.filter_by(team_id=current_user.team_id).first()
+    if slack_bot is None:
+        return render_template('home.html', redirect_uri=os.getenv('SLACK_REDIRECT_ADD_URI'))
+    else:
+        return redirect(url_for('record'))
+
+
+@app.route("/record", methods=['GET'])
+@login_required
+def record():
+    channels = get_slack_channels()
+    return render_template('record.html', channels=channels)
+
+
+def get_slack_channels():
+    token = SlackBot.query.filter_by(team_id=current_user.team_id).first().bot_access_token
+    oauth = get_slack_auth()
+    url = 'https://slack.com/api/conversations.list'
+    payload = {
+        "token": token,
+        "types": "public_channel,private_channel"
+    }
+    response = oauth.get(url, params=payload)
+    return [{"name": channel["name"], "id": channel["id"]} for channel in response.json()["channels"]]
 
 
 @app.route("/slack/add/redirect")
@@ -100,12 +119,6 @@ def oauth_login_redirect():
         return redirect(url_for('home'))
 
 
-@app.route("/record", methods=['GET'])
-@login_required
-def record():
-    return render_template('record.html')
-
-
 @app.route("/recording", methods=['POST'])
 @login_required
 def post_recording():
@@ -113,7 +126,7 @@ def post_recording():
     token = SlackBot.query.filter_by(team_id=current_user.team_id).first().bot_access_token
     payload = {
         "filename": "{}.{}".format(DT.datetime.now().strftime("%c"), 'mp3'),
-        "channels": ["#general"],
+        "channels": [request.form.get("channel")],
         "token": token,
         "initial_comment": "Recorded by: <@{}>".format(current_user.user_id)
     }
@@ -126,4 +139,5 @@ def post_recording():
             'file': request.files.get('recording')
         },
     )
+
     return "200 OK"

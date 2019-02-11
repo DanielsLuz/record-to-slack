@@ -4,6 +4,14 @@
 {% endblock %}
 {% block content %}
 <div class="container">
+  <div class="channel">
+    Send to:
+    <select id="channel-select" name="channel">
+      {% for channel in channels %}
+        <option value="{{channel["id"]}}">{{channel["name"]}}</option>
+      {% endfor%}
+    </select>
+  </div>
   <audio id="recording" controls></audio>
   <div class="actions">
     <button id="recordButton"></button>
@@ -89,8 +97,10 @@ submitButton.addEventListener("click", (e) => {
 
   let formData = new FormData()
   let request = new XMLHttpRequest()
+  let channelSelect = document.getElementById("channel-select")
 
   formData.append("recording", recorder.lastRecording(), "recording_filename.mp3")
+  formData.append("channel", channelSelect.value)
   request.open("POST", "/recording")
   request.send(formData)
 })
