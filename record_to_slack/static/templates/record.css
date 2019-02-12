@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(63,14,64,1);
-  font-size: 25px;
+  font-size: 20px;
   color: rgba(63,14,64,1);
 }
 
@@ -34,24 +34,23 @@
   width: 35px;
   height: 35px;
   margin: 15px;
+  padding: 0;
+  border: 0;
+  color: white;
+  background-color: black;
+  font-size: 12px;
   cursor: pointer;
 }
 
 .actions #recordButton {
-	font-size: 0;
-	background-color: darkred;
-	border: 0;
+  background-color: darkred;
   border-radius: 50%;
-	outline: none;
+  outline: none;
 }
 
 .actions #recordButton.recording {
   background-color: red;
   animation: 1.5s infinite linear pulse;
-}
-
-.actions #stopButton {
-  background-color: black;
 }
 
 .actions #stopButton:disabled {
@@ -63,9 +62,11 @@
   align-items: center;
   justify-content: center;
   width: 70px;
+  color: rgba(63,14,64,1);
   background-color: white;
   margin-left: 30px;
   border-radius: 5px;
+  font-size: initial;
 }
 
 .footer a {
