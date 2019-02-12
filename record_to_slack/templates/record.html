@@ -12,24 +12,27 @@
       {% endfor%}
     </select>
   </div>
-  <audio id="recording" controls></audio>
   <div class="actions">
-    <button id="recordButton">REC</button>
-    <button id="stopButton" class="stop" disabled>Stop</button>
-    <div id="submitButton">
-      Send
-    </div>
+    <button id="record-button">REC</button>
+    <button id="stop-button" class="stop" disabled>Stop</button>
+  </div>
+  <div class="record">
+    <audio id="recording" controls></audio>
+    <button id="submit-button">Send</button>
   </div>
   <div class="footer">
     <a href="{{ url_for('logout') }}">Logout</a>
   </div>
 </div>
 
+<style>
+</style>
+
 <script>
 const recording = document.getElementById("recording")
-const submitButton = document.getElementById("submitButton")
-const recordButton = document.getElementById("recordButton")
-const stopButton = document.getElementById("stopButton")
+const submitButton = document.getElementById("submit-button")
+const recordButton = document.getElementById("record-button")
+const stopButton = document.getElementById("stop-button")
 
 const Recorder = () => {
   let recordStream
@@ -101,7 +104,18 @@ submitButton.addEventListener("click", (e) => {
 
   formData.append("recording", recorder.lastRecording(), "recording_filename.mp3")
   formData.append("channel", channelSelect.value)
+
   request.open("POST", "/recording")
+  request.onload = () => {
+    if (request.readyState === 4) {
+      if (request.status === 200) {
+        alert("Recording sent succesfuly!")
+      } else {
+        console.error(request.statusText)
+        alert("Something went wrong... Please check console logs.")
+      }
+    }
+  }
   request.send(formData)
 })
 </script>
