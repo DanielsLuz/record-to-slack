@@ -13,17 +13,11 @@ def load_user(user_id):
     return User.query.filter_by(user_id=user_id).first()
 
 
-def get_slack_auth(state=None, token=None, redirect_uri=None):
-    if token:
-        return OAuth2Session(os.getenv('SLACK_CLIENT_ID'), token=token)
-    if state:
-        return OAuth2Session(os.getenv('SLACK_CLIENT_ID'), state=state, redirect_uri=os.getenv('SLACK_REDIRECT_URI'))
-
-    oauth = OAuth2Session(
+def get_slack_auth(redirect_uri=None):
+    return OAuth2Session(
         os.getenv('SLACK_CLIENT_ID'),
         redirect_uri=redirect_uri or os.getenv('SLACK_REDIRECT_URI')
     )
-    return oauth
 
 
 @app.route("/login")
@@ -67,28 +61,28 @@ def get_slack_channels():
 
 @app.route("/slack/login/redirect")
 def oauth_login_redirect():
-    if current_user is None and current_user.is_authenticated:
+    if current_user is not None and current_user.is_authenticated:
         return redirect(url_for('record'))
-    else:
-        code = request.args.get('code')
-        oauth = get_slack_auth()
-        token_response = oauth.fetch_token(
-            'https://slack.com/api/oauth.access',
-            code=code,
-            client_secret=os.getenv('SLACK_CLIENT_SECRET')
+
+    code = request.args.get('code')
+    oauth = get_slack_auth()
+    token_response = oauth.fetch_token(
+        'https://slack.com/api/oauth.access',
+        code=code,
+        client_secret=os.getenv('SLACK_CLIENT_SECRET')
+    )
+    user = User.query.filter_by(user_id=token_response['user_id']).first()
+    if user is None:
+        user = User(
+            user_id=token_response['user_id'],
+            team_id=token_response['team_id']
         )
-        user = User.query.filter_by(user_id=token_response['user_id']).first()
-        if user is None:
-            user = User(
-                user_id=token_response['user_id'],
-                team_id=token_response['team_id']
-            )
-        user.access_token = token_response['access_token']
-        user._scopes = token_response['scope']
-        db.session.add(user)
-        db.session.commit()
-        login_user(user, remember=True)
-        return redirect(url_for('record'))
+    user.access_token = token_response['access_token']
+    user._scopes = token_response['scope']
+    db.session.add(user)
+    db.session.commit()
+    login_user(user, remember=True)
+    return redirect(url_for('record'))
 
 
 @app.route("/recording", methods=['POST'])

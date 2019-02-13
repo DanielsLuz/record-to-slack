@@ -14,7 +14,6 @@ It is not the most beautiful page you ever see, I know... But it fulfills it's p
 
 ### Demo
 The app is hosted on heroku, you can check it at: https://record-to-slack.herokuapp.com/login
-You just need permission on your workspace to add a bot.
 
 ### Usage notes
 The application's usage is pretty straight forward. Just login and add the app to your workspace, and you can start sending recordings to every channel the bot is invited to.
