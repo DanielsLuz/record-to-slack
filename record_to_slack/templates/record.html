@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block style %}
-<link rel="stylesheet" href="{{ url_for('static', filename='templates/record.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/record.css') }}">
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -47,7 +47,7 @@ const Recorder = () => {
     mediaRecorder.ondataavailable = event => {
       audioChunks.push(event.data)
       if(mediaRecorder.state == "inactive") {
-        let recordedBlob = new Blob(audioChunks, { type: "audio/mp3" })
+        let recordedBlob = new Blob(audioChunks, { type: "audio/mpeg" })
         lastRecording = recordedBlob
         recording.src = URL.createObjectURL(recordedBlob)
       }
@@ -58,6 +58,7 @@ const Recorder = () => {
   const start = () => {
     navigator.mediaDevices.getUserMedia({
       audio: true,
+      video: false
     }).then(stream => startRecording(stream))
   }
 
@@ -102,7 +103,7 @@ submitButton.addEventListener("click", (e) => {
   let request = new XMLHttpRequest()
   let channelSelect = document.getElementById("channel-select")
 
-  formData.append("recording", recorder.lastRecording(), "recording_filename.mp3")
+  formData.append("recording", recorder.lastRecording())
   formData.append("channel", channelSelect.value)
 
   request.open("POST", "/recording")

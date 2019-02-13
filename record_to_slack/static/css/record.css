@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(63,14,64,1);
+  background: radial-gradient(circle, rgba(35,32,95,1) 0%, rgba(63,14,64,1) 100%, rgba(9,122,145,1) 100%);
   color: rgba(63,14,64,1);
 }
 
