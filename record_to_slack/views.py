@@ -2,7 +2,7 @@ import os
 import datetime as DT
 
 from record_to_slack import app, db, login_manager
-from record_to_slack.models import User, SlackBot
+from record_to_slack.models import User
 from flask import render_template, request, redirect, url_for, session
 from requests_oauthlib import OAuth2Session
 from flask_login import login_required, current_user, login_user, logout_user
@@ -40,14 +40,10 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route("/")
+@app.route("/", methods=['GET'])
 @login_required
 def home():
-    slack_bot = SlackBot.query.filter_by(team_id=current_user.team_id).first()
-    if slack_bot is None:
-        return render_template('home.html', redirect_uri=os.getenv('SLACK_REDIRECT_ADD_URI'))
-    else:
-        return redirect(url_for('record'))
+    return redirect(url_for('record'))
 
 
 @app.route("/record", methods=['GET'])
@@ -58,7 +54,7 @@ def record():
 
 
 def get_slack_channels():
-    token = SlackBot.query.filter_by(team_id=current_user.team_id).first().bot_access_token
+    token = current_user.access_token
     oauth = get_slack_auth()
     url = 'https://slack.com/api/conversations.list'
     payload = {
@@ -69,33 +65,10 @@ def get_slack_channels():
     return [{"name": channel["name"], "id": channel["id"]} for channel in response.json()["channels"]]
 
 
-@app.route("/slack/add/redirect")
-def oauth_add_redirect():
-    code = request.args.get('code')
-    oauth = get_slack_auth(redirect_uri=os.getenv('SLACK_REDIRECT_ADD_URI'))
-    token_response = oauth.fetch_token(
-        'https://slack.com/api/oauth.access',
-        code=code,
-        client_secret=os.getenv('SLACK_CLIENT_SECRET')
-    )
-    slack_bot = SlackBot.query.filter_by(bot_user_id=token_response['bot']['bot_user_id']).first()
-    if slack_bot is None:
-        slack_bot = SlackBot(
-            bot_user_id=token_response['bot']['bot_user_id'],
-            bot_access_token=token_response['bot']['bot_access_token'],
-            team_name=token_response['team_name'],
-            team_id=token_response['team_id'],
-            _scopes=token_response['scope']
-        )
-        db.session.add(slack_bot)
-        db.session.commit()
-    return redirect(url_for('home'))
-
-
 @app.route("/slack/login/redirect")
 def oauth_login_redirect():
     if current_user is None and current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('record'))
     else:
         code = request.args.get('code')
         oauth = get_slack_auth()
@@ -104,31 +77,28 @@ def oauth_login_redirect():
             code=code,
             client_secret=os.getenv('SLACK_CLIENT_SECRET')
         )
-        user = User.query.filter_by(user_id=token_response['user']['id']).first()
+        user = User.query.filter_by(user_id=token_response['user_id']).first()
         if user is None:
             user = User(
-                user_id=token_response['user']['id'],
-                user_name=token_response['user']['name'],
-                team_id=token_response['team']['id']
+                user_id=token_response['user_id'],
+                team_id=token_response['team_id']
             )
         user.access_token = token_response['access_token']
         user._scopes = token_response['scope']
         db.session.add(user)
         db.session.commit()
         login_user(user, remember=True)
-        return redirect(url_for('home'))
+        return redirect(url_for('record'))
 
 
 @app.route("/recording", methods=['POST'])
 @login_required
 def post_recording():
     url = 'https://slack.com/api/files.upload'
-    token = SlackBot.query.filter_by(team_id=current_user.team_id).first().bot_access_token
     payload = {
         "filename": "{}.{}".format(DT.datetime.now().strftime("%c"), 'mp3'),
         "channels": [request.form.get("channel")],
-        "token": token,
-        "initial_comment": "Recorded by: <@{}>".format(current_user.user_id)
+        "token": current_user.access_token,
     }
 
     oauth = get_slack_auth()

@@ -15,14 +15,9 @@ It is not the most beautiful page you ever see, I know... But it fulfills it's p
 ### Demo
 The app is hosted on heroku, you can check it at: https://record-to-slack.herokuapp.com/login
 You just need permission on your workspace to add a bot.
-**Important:** Check **Usage notes** below.
 
 ### Usage notes
 The application's usage is pretty straight forward. Just login and add the app to your workspace, and you can start sending recordings to every channel the bot is invited to.
-
-**NOTE FOR WORKSPACE ADMINS**: the audio messages are posted by the bot user, which means that any channel the bot is in will appear in the select options, including **private** channels. If you have any channel that should NOT be exposed (even it's existence), do **NOT** invite the bot to it. No reading of messages is made by the bot, just the listing of channels it has access to.
-
-**Reinforcing**: permissions are based on the bot's user, not on the logged in user, be careful with private channels exposure. Again, messages will not be read, but the channel's name will be seen and audio can be sent into that channel.
 
 ### Setup (for developers)
 The app is now distributed, which means you can add it directly to other workspaces.
@@ -31,7 +26,6 @@ If you want to checkout the code and host it yourself, you need to do some setup
 The first step is the Slack's configuration:
 * create a Slack app following [this guide](https://api.slack.com/slack-apps#creating_apps)
 * configure your redirect URLs
-* add a BOT user that will be used to sending the recordings to your workspace
 
 Second step is to configure your hosting.
 * Some environment variables are required
